@@ -10,3 +10,9 @@ Follow its prompts and enjoy.
 
 Don Irwin
 -- Inspired by John Danson's work.
+
+Run straight out of the box:
+
+```
+https://github.com/tuneman7/aws_create_layers_in_cloud9 && cd aws_create_layers_in_cloud9 && . aws_layer_helper.sh
+```
