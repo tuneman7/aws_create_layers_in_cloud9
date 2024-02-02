@@ -193,9 +193,9 @@ create_lambda_layer() {
 
     # Copy site-packages to python directory
     print_message_with_asterisks "Copying site-packages to python directory"
-    cp -r "./$layer_name/lib/python3.10/site-packages/*" ./python || {
+    cp -r $(pwd)/$layer_name/lib/python3.10/site-packages/ $(pwd)/python || {
         print_message_with_asterisks "Error occurred while copying site-packages to python directory."
-        print_message_with_asterisks "cp -r ./$layer_name/lib/python3.10/site-packages/* ./python"
+        print_message_with_asterisks "cp -r $(pwd)/$layer_name/lib/python3.10/site-packages/* $(pwd)/python"
         return 1
     }
 
