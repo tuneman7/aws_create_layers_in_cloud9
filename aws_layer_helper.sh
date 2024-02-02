@@ -167,8 +167,6 @@ validate_layer_name() {
 }
 
 
-#!/bin/bash
-
 # Function to create Lambda Layer
 create_lambda_layer() {
 
