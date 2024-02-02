@@ -1,5 +1,32 @@
 #!/bin/bash
 
+############################################################################
+# aws_layer_helper.sh
+#
+#https://github.com/tuneman7/aws_create_layers_in_cloud9
+#
+#Don Irwin 02/02/2024 Inspired by John Danson's work
+#
+#Purpose:  
+#Create lambda layers in AWS and publish them.
+#
+#Get rid of any PIP residue or setuptools residue in order to save space
+#
+#Clear all pycache directories to save space.
+#
+#Automate around requirements.txt
+#
+#Requires:
+#
+#AWS Cli to be set up and working.
+#
+#Best run from a command prompt off of an AWS cloud 9 box.
+#
+#
+#
+############################################################################
+
+
 #house keeping
 
 clear
