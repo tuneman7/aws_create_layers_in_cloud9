@@ -1,5 +1,11 @@
 #!/bin/bash
 
+#house keeping
+
+clear
+deactivate
+rm -rf ./python
+
 # Function to print a message with asterisks
 print_message_with_asterisks() {
     local message="$1"
@@ -187,8 +193,9 @@ create_lambda_layer() {
 
     # Copy site-packages to python directory
     print_message_with_asterisks "Copying site-packages to python directory"
-    cp -r "./$layer_name/lib/python3.10/site-packages/*" python || {
+    cp -r "./$layer_name/lib/python3.10/site-packages/*" ./python || {
         print_message_with_asterisks "Error occurred while copying site-packages to python directory."
+        print_message_with_asterisks "cp -r ./$layer_name/lib/python3.10/site-packages/* ./python"
         return 1
     }
 
