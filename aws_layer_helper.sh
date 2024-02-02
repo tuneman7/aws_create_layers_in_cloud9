@@ -199,6 +199,24 @@ create_lambda_layer() {
         return 1
     }
 
+    # Removing any directories not needed by the layer
+    print_message_with_asterisks "Removing Un-needed Stuff"
+    rm -rf $(pwd)/python/pip* || {
+        print_message_with_asterisks "Error occurred while removing unnecessary stuff."
+        print_message_with_asterisks "rm -rf $(pwd)/python/pip*"
+        return 1
+    }
+
+    # Removing any directories not needed by the layer
+    print_message_with_asterisks "Removing Un-needed Stuff"
+    rm -rf $(pwd)/python/setuptools* || {
+        print_message_with_asterisks "Error occurred while removing unnecessary stuff."
+        print_message_with_asterisks "rm -rf $(pwd)/python/setuptools*"
+        return 1
+    }
+
+
+
     # Zip the layer
     print_message_with_asterisks "Zipping the layer"
     zip -r "$layer_name.zip" ./python || {
@@ -219,9 +237,10 @@ create_lambda_layer() {
 # Clean stuff up
 do_cleanup() {
     print_message_with_asterisks "Cleaning stuff up"
-    dactivate
+    deactivate
     rm -rf ./$layer_name
     rm -rf ./python
+    rm -rf ./*.zip
     print_message_with_asterisks "Cleanup done"
 }
 
@@ -283,3 +302,5 @@ fi
 # Call the function to create the Lambda Layer
 create_lambda_layer
 
+#At last do a cleanup.
+do_cleanup
