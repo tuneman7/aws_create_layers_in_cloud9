@@ -213,8 +213,18 @@ create_lambda_layer() {
         return 1
     }
 
+    # Removing any directories not needed by the layer
+    print_message_with_asterisks "Removing Un-needed Stuff"
+    rm -rf $(pwd)/python/*dist-info || {
+        print_message_with_asterisks "Error occurred while removing unnecessary stuff."
+        print_message_with_asterisks "rm -rf $(pwd)/python/*dist-info"
+        return 1
+    }
 
-
+    # Removing any directories not needed by the layer
+    print_message_with_asterisks "Removing Un-needed Stuff"
+    find $(pwd)/python -type d -name "__pycache__" -exec rm -r {} \; 
+    
     # Zip the layer
     print_message_with_asterisks "Zipping the layer"
     zip -r "$layer_name.zip" ./python || {
@@ -242,7 +252,7 @@ do_cleanup() {
     print_message_with_asterisks "Cleanup done"
 }
 
-# Main script
+# Splash
 print_banner
 
 # Check if Python 3.10 is installed
@@ -251,6 +261,11 @@ validate_python_version
 # Install c9 globally if not already installed
 install_c9
 
+# Splash
+print_banner
+
+#Let everyone know this build is for runtime 3.10 only
+print_message_with_asterisks "Please note this is for python 3.10 only."
 # Prompt the user for the layer name (including periods)
 validate_layer_name
 
@@ -299,6 +314,13 @@ fi
 #finally if everything is okay -- create the lambda layer
 # Call the function to create the Lambda Layer
 create_lambda_layer
+
+#If there was an error return.
+if [ $? -eq 1 ]; then
+    print_message_with_asterisks "There was an error setting up the lambda layer. Exiting."
+    return
+fi
+
 
 #At last do a cleanup.
 do_cleanup
