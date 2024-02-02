@@ -193,7 +193,7 @@ create_lambda_layer() {
 
     # Copy site-packages to python directory
     print_message_with_asterisks "Copying site-packages to python directory"
-    cp -r $(pwd)/$layer_name/lib/python3.10/site-packages/ $(pwd)/python || {
+    cp -r $(pwd)/$layer_name/lib/python3.10/site-packages/* $(pwd)/python || {
         print_message_with_asterisks "Error occurred while copying site-packages to python directory."
         print_message_with_asterisks "cp -r $(pwd)/$layer_name/lib/python3.10/site-packages/* $(pwd)/python"
         return 1
@@ -213,9 +213,17 @@ create_lambda_layer() {
         return 1
     }
 
-    echo "Lambda Layer creation successful"
+    print_message_with_asterisks "Lambda Layer ($layer_name) creation successful"
 }
 
+# Clean stuff up
+do_cleanup() {
+    print_message_with_asterisks "Cleaning stuff up"
+    dactivate
+    rm -rf ./$layer_name
+    rm -rf ./python
+    print_message_with_asterisks "Cleanup done"
+}
 
 # Main script
 print_banner
@@ -271,7 +279,7 @@ if [ $? -ne 0 ]; then
     done
 fi
 
-
 #finally if everything is okay -- create the lambda layer
 # Call the function to create the Lambda Layer
 create_lambda_layer
+
