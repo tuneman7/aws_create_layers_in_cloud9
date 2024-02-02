@@ -106,12 +106,17 @@ check_requirements() {
 
 # Function to prompt user to confirm they want to move forward
 are_you_sure() {
-    print_message_with_asterisks "Are you sure you want to proceed?"
-    read -p "Type 'yes' to continue or 'no' to exit: " confirmation
-    if [ "$confirmation" != "yes" ]; then
-        exit 0
-    fi
+    while true; do
+        print_message_with_asterisks "Are you sure you want to proceed?"
+        read -p "Type 'y' to continue or 'n' to exit: " confirmation
+        case $confirmation in
+            [Yy]* ) return;; # Return without exiting for 'yes'
+            [Nn]* ) return 1;; # Return 1 (error code) for 'no'
+            * ) echo "Invalid input. Please enter 'y' to continue or 'n' to exit.";;
+        esac
+    done
 }
+
 
 
 # Function to validate AWS S3 LS command response with asterisks
@@ -144,10 +149,10 @@ configure_aws() {
 }
 
 
-# Function to validate the layer name format (allows periods)
+# Function to validate the layer name format (allows hyphens and periods)
 validate_layer_name() {
     read -p "Enter the layer name (a-z, A-Z, 0-9, hyphens, and periods allowed): " layer_name
-    if [[ "$layer_name" =~ ^[a-zA-Z0-9-.]+$ ]]; then
+    if [[ "$layer_name" =~ ^[a-zA-Z0-9.-]+$ ]]; then
         echo "Layer name is valid: $layer_name"
     else
         print_message_with_asterisks "Invalid layer name format. Please use only a-z, A-Z, 0-9, hyphens, and periods."
@@ -155,6 +160,54 @@ validate_layer_name() {
     fi
 }
 
+
+#!/bin/bash
+
+# Function to create Lambda Layer
+create_lambda_layer() {
+
+    print_message_with_asterisks "Creating Lambda Layer"
+
+    # Ensure Python 3.10 is installed
+    validate_python_version
+
+    # Upgrade pip
+    echo "Upgrading pip"
+    python3.10 -m pip install --upgrade pip || {
+        print_message_with_asterisks "Error occurred while upgrading pip."
+        return 1
+    }
+
+    # Install dependencies from requirements.txt
+    print_message_with_asterisks "Installing dependencies from requirements.txt"
+    python3.10 -m pip install -r requirements.txt || {
+        print_message_with_asterisks "Error occurred while installing dependencies from requirements.txt."
+        return 1
+    }
+
+    # Copy site-packages to python directory
+    print_message_with_asterisks "Copying site-packages to python directory"
+    cp -r "./$layer_name/lib/python3.10/site-packages/" python || {
+        print_message_with_asterisks "Error occurred while copying site-packages to python directory."
+        return 1
+    }
+
+    # Zip the layer
+    print_message_with_asterisks "Zipping the layer"
+    zip -r "$layer_name.zip" ./python || {
+        print_message_with_asterisks "Error occurred while zipping the layer."
+        return 1
+    }
+
+    # Publish the Lambda Layer
+    print_message_with_asterisks "Publishing the Lambda Layer"
+    aws lambda publish-layer-version --layer-name "$layer_name" --zip-file "fileb://$layer_name.zip" --compatible-runtimes python3.10 || {
+        print_message_with_asterisks "Error occurred while publishing the Lambda Layer."
+        return 1
+    }
+
+    echo "Lambda Layer creation successful"
+}
 
 
 # Main script
@@ -179,10 +232,10 @@ open_requirements
 check_requirements
 if [ $? -eq 1 ]; then
     open_requirements
+    # Prompt user to confirm if they want to proceed
+    are_you_sure    
 fi
 
-# Prompt user to confirm if they want to proceed
-are_you_sure
 
 # Validate AWS S3 LS command response
 validate_aws_s3_ls
@@ -210,3 +263,8 @@ if [ $? -ne 0 ]; then
         fi
     done
 fi
+
+
+#finally if everything is okay -- create the lambda layer
+# Call the function to create the Lambda Layer
+create_lambda_layer
